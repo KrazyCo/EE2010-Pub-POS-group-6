@@ -1,7 +1,13 @@
 <Solution>
   <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Release" />
+    <BuildType Name="Testing" />
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="EE2010 Pub POS group 6/EE2010 Pub POS group 6.vcxproj" />
+  <Project Path="EE2010 Pub POS group 6/EE2010 Pub POS group 6.vcxproj" Id="03327f3c-5cef-4877-aecf-70c3bdd1f3b7">
+    <BuildType Solution="Testing|x64" Project="Release" />
+    <Build Solution="Testing|x86" Project="false" />
+  </Project>
 </Solution>
