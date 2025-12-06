@@ -1,4 +1,5 @@
 #include "Bill.h"
+#include <ctime>
 
 std::vector<Bill> bills{}; // single definition
 

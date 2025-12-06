@@ -16,7 +16,7 @@ Liquor doubleVodka(
     1,
     coord2d{0, 0},
     span2d{1, 1},
-    50 // quantity
+    5 // quantity
 );
 Liquor singleVodka(
     ShotMeasure::singleShot,
@@ -25,7 +25,7 @@ Liquor singleVodka(
     1,
     coord2d{0, 1},
     span2d{1, 1},
-    80
+    8
 );
 
 Liquor doubleWhiskey(
@@ -35,7 +35,7 @@ Liquor doubleWhiskey(
     1,
     coord2d{1, 0},
     span2d{1, 1},
-    40
+    4
 );
 Liquor singleWhiskey(
     ShotMeasure::singleShot,
@@ -44,7 +44,7 @@ Liquor singleWhiskey(
     1,
     coord2d{1, 1},
     span2d{1, 1},
-    70
+    10
 );
 
 // Draft
@@ -56,7 +56,7 @@ Draft Asahi(
     2,
     coord2d{0, 0},
     span2d{1, 1},
-    100
+    12
 );
 Draft HalfAsahi(
     Measure::halfPint,
@@ -66,7 +66,7 @@ Draft HalfAsahi(
     2,
     coord2d{0, 1},
     span2d{1, 1},
-    120
+    15
 );
 Draft Heineken(
     Measure::pint,
@@ -76,7 +76,7 @@ Draft Heineken(
     2,
     coord2d{1, 0},
     span2d{1, 1},
-    90
+    10
 );
 Draft HalfHeineken(
     Measure::halfPint,
@@ -86,7 +86,7 @@ Draft HalfHeineken(
     2,
     coord2d{1, 1},
     span2d{1, 1},
-    110
+    14
 );
 Draft Coke(
     Measure::pint,
@@ -96,7 +96,7 @@ Draft Coke(
     2,
     coord2d{2, 0},
     span2d{1, 1},
-    60
+    8
 );
 Draft HalfCoke(
     Measure::halfPint,
@@ -106,7 +106,7 @@ Draft HalfCoke(
     2,
     coord2d{2, 1},
     span2d{1, 1},
-    80
+    12
 );
 
 // Food
@@ -117,7 +117,7 @@ Food smallFries(
     3,
     coord2d{0, 0},
     span2d{1, 1},
-    200
+    20
 );
 Food regularFries(
     FoodSize::regular,
@@ -126,7 +126,7 @@ Food regularFries(
     3,
     coord2d{0, 1},
     span2d{1, 1},
-    180
+    18
 );
 
 Food largeFries(
@@ -136,7 +136,7 @@ Food largeFries(
     3,
     coord2d{0, 2},
     span2d{1, 1},
-    160
+    16
 );
 
 Food smallWings(
@@ -146,7 +146,7 @@ Food smallWings(
     3,
     coord2d{1, 0},
     span2d{1, 1},
-    140
+    14
 );
 Food regularWings(
     FoodSize::regular,
@@ -155,7 +155,7 @@ Food regularWings(
     3,
     coord2d{1, 1},
     span2d{1, 1},
-    120
+    12
 );
 
 Food largeWings(
@@ -165,7 +165,7 @@ Food largeWings(
     3,
     coord2d{1, 2},
     span2d{1, 1},
-    100
+    10
 );
 
 // Single unified non-owning catalog

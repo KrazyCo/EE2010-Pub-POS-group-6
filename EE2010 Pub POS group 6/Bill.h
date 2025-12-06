@@ -9,14 +9,28 @@
 class Bill
 {
 private:
-    std::string serverName{}; // name of the server
-    std::vector<Item*> itemsOrdered{}; // non-owning polymorphic pointers - object slices class specific attributes but not needed after adding to bill
-    float totalPrice{}; // total price of the bill
-    bool paid{}; // whether the bill has been paid
-    bool fulfilled{}; // whether the order has been fulfilled
-    float discount{}; // discount applied to the bill if any
-    time_t timeOpened{}; // time when the bill was opened
+    std::string serverName{};              // staff who created the bill
+    std::vector<Item*> itemsOrdered{};     // non-owning pointers
+    float totalPrice{};                    // total price of the bill
+    bool paid{};                           // whether the bill has been paid
+    bool fulfilled{};                      // whether the order has been fulfilled
+    float discount{};                      // discount applied to the bill if any
+    time_t timeOpened{};                   // when the bill was opened
+    time_t timePaid{};                     // when the bill was marked paid (0 if not paid)
+
 public:
+    // Construct a bill with the creating staff's name; captures open time.
+    explicit Bill(const std::string& server)
+        : serverName(server),
+          totalPrice(0.0f),
+          paid(false),
+          fulfilled(false),
+          discount(0.0f),
+          timeOpened(std::time(nullptr)),
+          timePaid(0)
+    {
+    }
+
     // Non-owning: references existing catalog items (Drink/Food/Liquor/etc.)
     bool addItem(Item& item);
 
@@ -24,21 +38,20 @@ public:
     // Returns true if an occurrence was found and removed.
     bool removeItem(Item& item);
 
-    float getTotalPrice() const {
-        return totalPrice;
-    }
+    float getTotalPrice() const { return totalPrice; }
+    const std::vector<Item*>& getItems() const { return itemsOrdered; }
 
-    const std::vector<Item*>& getItems() const {
-        return itemsOrdered;
-    }
+    // Creator and timestamps
+    const std::string& getServerName() const { return serverName; }
+    time_t getTimeOpened() const { return timeOpened; }
+    time_t getTimePaid() const { return timePaid; }
 
     // Paid status
-    bool isPaid() const {
-        return paid;
-    }
+    bool isPaid() const { return paid; }
 
     void markPaid() {
         paid = true;
+        timePaid = std::time(nullptr);
     }
 };
 

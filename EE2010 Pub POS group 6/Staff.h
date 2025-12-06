@@ -24,5 +24,6 @@ public:
     void setUserName(const std::string& name) { userName = name; }
     void setPassword(const std::string& pwd) { password = pwd; }
     void setEmail(const std::string& mail) { email = mail; }
+    int getId() const { return userID; }
 };
 
