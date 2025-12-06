@@ -142,6 +142,7 @@
     <ClInclude Include="Drink.h" />
     <ClInclude Include="Food.h" />
     <ClInclude Include="Item.h" />
+    <ClInclude Include="Item_config.h" />
     <ClInclude Include="Liquor.h" />
   </ItemGroup>
   <ItemGroup>

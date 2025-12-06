@@ -1,8 +1,11 @@
 #pragma once
 
 #include "Drink.h"
+#include "2dUtils.h"
+#include <cstdint> // uint8_t
+#include <corecrt.h>
 
-enum class Measure
+enum class ShotMeasure
 {
 	singleShot,
 	doubleShot
@@ -11,6 +14,10 @@ enum class Measure
 class Liquor : public Drink
 {
 private:
-	Measure measure{}; // measure of the liquor
+	ShotMeasure measure{}; // measure of the liquor
+public:
+	Liquor(ShotMeasure measure, std::string name, float price, uint8_t screen, coord2d pos, span2d span)
+		: Drink(true, name, price, screen, pos, span), measure(measure) {
+	}
 };
 
