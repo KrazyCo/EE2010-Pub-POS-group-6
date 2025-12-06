@@ -8,6 +8,7 @@
 
 // Configure catalog with starting quantities
 
+// Liquor
 Liquor doubleVodka(
     ShotMeasure::doubleShot,
     "Double Vodka",
@@ -46,8 +47,7 @@ Liquor singleWhiskey(
     70
 );
 
-std::vector<Liquor> liqourItems{ doubleVodka, singleVodka, doubleWhiskey, singleWhiskey };
-
+// Draft
 Draft Asahi(
     Measure::pint,
     true,
@@ -109,8 +109,7 @@ Draft HalfCoke(
     80
 );
 
-std::vector<Draft> draftItems{ Asahi, HalfAsahi, Heineken, HalfHeineken, Coke, HalfCoke };
-
+// Food
 Food smallFries(
     FoodSize::small,
     "Small Fries",
@@ -169,4 +168,9 @@ Food largeWings(
     100
 );
 
-std::vector<Food> foodItems{ smallFries, regularFries, largeFries, smallWings, regularWings, largeWings };
+// Single unified non-owning catalog
+static std::vector<Item*> catalogItems{
+    &doubleVodka, &singleVodka, &doubleWhiskey, &singleWhiskey,
+    &Asahi, &HalfAsahi, &Heineken, &HalfHeineken, &Coke, &HalfCoke,
+    &smallFries, &regularFries, &largeFries, &smallWings, &regularWings, &largeWings
+};

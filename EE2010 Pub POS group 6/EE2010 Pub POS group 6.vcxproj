@@ -134,6 +134,8 @@
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Liquor.cpp" />
+    <ClCompile Include="Manager.cpp" />
+    <ClCompile Include="Staff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2dUtils.h" />
@@ -144,6 +146,9 @@
     <ClInclude Include="Item.h" />
     <ClInclude Include="Item_config.h" />
     <ClInclude Include="Liquor.h" />
+    <ClInclude Include="Manager.h" />
+    <ClInclude Include="Staff.h" />
+    <ClInclude Include="Staff_config.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\README.md" />

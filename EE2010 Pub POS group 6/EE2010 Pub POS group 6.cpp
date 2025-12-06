@@ -12,6 +12,7 @@
 #include "Bill.h"
 #include "Item.h"
 #include "Item_config.h"
+#include "Drink.h" // add to use Drink-specific properties
 
 // Global exit flag to allow exiting from any context (including screen menus)
 static bool g_exitRequested = false;
@@ -55,18 +56,7 @@ static void renderDivider()
     std::cout << "----------------------------------------\n";
 }
 
-// Build combined non-owning catalog from premade vectors
-static std::vector<Item*> buildCatalog()
-{
-    std::vector<Item*> catalog;
-    catalog.reserve(liqourItems.size() + draftItems.size() + foodItems.size());
-    for (auto& l : liqourItems) catalog.push_back(&l);
-    for (auto& d : draftItems)  catalog.push_back(&d);
-    for (auto& f : foodItems)   catalog.push_back(&f);
-    return catalog;
-}
-
-// Group catalog items by their screen attribute
+// Group catalog items by their screen attribute (using unified catalog)
 static std::map<uint8_t, std::vector<Item*>> groupCatalogByScreen(const std::vector<Item*>& catalog)
 {
     std::map<uint8_t, std::vector<Item*>> byScreen;
@@ -137,6 +127,16 @@ static void waitForEnter()
     std::cout << " Press Enter to continue...";
     std::string dummy;
     std::getline(std::cin, dummy);
+}
+
+// Simple yes/no prompt
+static bool confirmIdChecked()
+{
+    std::cout << " This item is alcoholic. Confirm ID checked (y/n): ";
+    std::string resp;
+    std::getline(std::cin, resp);
+    std::string r = toLower(trim(resp));
+    return (r == "y" || r == "yes");
 }
 
 // Parse global commands available from anywhere.
@@ -243,6 +243,17 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
             std::cout << "\nERROR: Item not found: " << name << "\n";
             return true;
         }
+
+        // Alcohol ID check
+        if (auto* drink = dynamic_cast<Drink*>(it)) {
+            if (drink->getIsAlcohol()) {
+                if (!confirmIdChecked()) {
+                    std::cout << "\nAction cancelled. ID must be checked for alcoholic items.\n";
+                    return true;
+                }
+            }
+        }
+
         if (currentBill->addItem(*it)) {
             std::cout << "\nAdded: " << it->getName()
                       << " | New total: $" << std::fixed << std::setprecision(2) << currentBill->getTotalPrice() << "\n";
@@ -306,17 +317,12 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
             std::cout << " ERROR: No bill selected.\n";
             std::cout << " [0] Back to screens\n";
             renderDivider();
-            std::cout << "> ";
-            std::string dummy;
-            std::getline(std::cin, dummy); // allow user to go back or type commands; [0]/0 handled below
-            // Treat any input as back when no bill is selected
             return;
         }
 
         std::cout << " Bill total: $" << std::fixed << std::setprecision(2) << currentBill->getTotalPrice() << "\n";
         std::cout << " [0] Back to screens\n";
         renderDivider();
-        // Commands shown only on screen menus
         std::cout << " Commands: add <name>, add <index>, remove <name>, screen <x>, bill new, bill <x>, bill, bills, bill paid, exit\n";
         renderDivider();
 
@@ -327,9 +333,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
 
         std::string lower = toLower(input);
         if (lower == "exit") { g_exitRequested = true; return; }
-        if (lower == "[0]" || lower == "0") {
-            return;
-        }
+        if (lower == "[0]" || lower == "0") { return; }
 
         // screen <x> inside screen menu: jump to another screen quickly
         if (lower.rfind("screen ", 0) == 0) {
@@ -340,8 +344,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
                 std::cout << "\nERROR: Invalid screen number.\n";
                 continue;
             }
-            auto catalog = buildCatalog();
-            auto byScreen = groupCatalogByScreen(catalog);
+            auto byScreen = groupCatalogByScreen(catalogItems);
             auto it = byScreen.find(static_cast<uint8_t>(nextSid));
             if (it == byScreen.end()) {
                 std::cout << "\nERROR: Screen not found.\n";
@@ -378,6 +381,14 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
                     if (idx >= 0 && idx < static_cast<int>(screenItems.size())) {
                         Item* selected = screenItems[static_cast<size_t>(idx)];
                         if (selected) {
+                            // Alcohol ID check
+                            if (auto* drink = dynamic_cast<Drink*>(selected)) {
+                                if (drink->getIsAlcohol() && !confirmIdChecked()) {
+                                    std::cout << "\nAction cancelled. ID must be checked for alcoholic items.\n";
+                                    addedByIndex = true; // handled
+                                    continue;
+                                }
+                            }
                             if (currentBill->addItem(*selected)) {
                                 std::cout << "\nAdded: " << selected->getName()
                                           << " | New total: $" << std::fixed << std::setprecision(2) << currentBill->getTotalPrice() << "\n";
@@ -404,6 +415,15 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
                 std::cout << "\nERROR: Item not found: " << param << "\n";
                 continue;
             }
+
+            // Alcohol ID check
+            if (auto* drink = dynamic_cast<Drink*>(selected)) {
+                if (drink->getIsAlcohol() && !confirmIdChecked()) {
+                    std::cout << "\nAction cancelled. ID must be checked for alcoholic items.\n";
+                    continue;
+                }
+            }
+
             if (currentBill->addItem(*selected)) {
                 std::cout << "\nAdded: " << selected->getName()
                           << " | New total: $" << std::fixed << std::setprecision(2) << currentBill->getTotalPrice() << "\n";
@@ -437,8 +457,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
         }
 
         // NOW call global commands after local handlers
-        auto catalogAll = buildCatalog();
-        if (handleGlobalCommand(input, currentBill, currentBillIndex, catalogAll)) {
+        if (handleGlobalCommand(input, currentBill, currentBillIndex, catalogItems)) {
             if (g_exitRequested) return;
             continue;
         }
@@ -453,7 +472,8 @@ int main()
     Bill* currentBill = nullptr;
     int currentBillIndex = -1;
 
-    auto catalog = buildCatalog();
+    // Unified catalog from Item_config.h
+    auto& catalog = catalogItems;
     auto byScreen = groupCatalogByScreen(catalog);
 
     for (;;) {
@@ -535,7 +555,7 @@ int main()
             for (;;) {
                 if (g_exitRequested) break;
 
-                catalog = buildCatalog();
+                // Rebuild screen map from unified catalog
                 byScreen = groupCatalogByScreen(catalog);
 
                 if (byScreen.empty()) {
