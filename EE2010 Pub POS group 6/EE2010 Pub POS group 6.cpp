@@ -1,6 +1,6 @@
 // EE2010 Pub POS group 6.cpp
 // Entry point and console UI for the POS app.
-// This file wires together login, bill workflows, item screens, and manager tools.
+// This has login, bill workflows, item screens, and manager tools.
 
 #include <iostream>
 #include <iomanip>
@@ -67,7 +67,7 @@ static void renderDivider()
 }
 
 // Groups the catalog into screens by the item "screen" id.
-// This keeps the rest of the UI agnostic to how items are laid out.
+// This keeps the rest of the UI to how items are laid out.
 static std::map<uint8_t, std::vector<Item*>> groupCatalogByScreen(const std::vector<Item*>& catalog)
 {
     std::map<uint8_t, std::vector<Item*>> byScreen;
@@ -78,7 +78,7 @@ static std::map<uint8_t, std::vector<Item*>> groupCatalogByScreen(const std::vec
     return byScreen;
 }
 
-// Case-insensitive exact name match across the unified catalog.
+// Case-insensitive exact name match across the catalog.
 static Item* findItemByName(const std::vector<Item*>& catalog, const std::string& name)
 {
     std::string target = toLower(name);
@@ -182,7 +182,7 @@ static void renderLoginHeader()
 // Login lookup searches the user list.
 static const Staff* findUserByName(const std::string& name)
 {
-    // Case-insensitive match over the mutable user directory
+    // Case-insensitive match over the user directory
     std::string needle = toLower(trim(name));
     for (Staff* u : g_users) {
         if (!u) continue;
@@ -439,7 +439,6 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
 // Notes:
 // - We show stock here to help staff avoid adding out-of-stock items.
 // - "back" or "0" returns to the screen selection menu.
-// - Stock admin is not shown here; managers have a separate Stock screen.
 static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screenId, const std::vector<Item*>& screenItems)
 {
     for (;;) {
