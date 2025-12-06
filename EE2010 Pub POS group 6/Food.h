@@ -18,8 +18,10 @@ class Food : public Item
 private:
 	FoodSize size{}; // size of the food item
 public:
-	Food(FoodSize size, std::string name, float price, uint8_t screen, coord2d pos, span2d span)
-		: Item(name, price, screen, pos, span), size(size) {
+	Food(FoodSize size, std::string name, float price, uint8_t screen, coord2d pos, span2d span, int quantity);
+
+	FoodSize getSize() const {
+		return size;
 	}
 };
 

@@ -17,8 +17,10 @@ class Draft : public Drink
 private:
 	Measure measure{}; // measure of the draft
 public:
-	Draft(Measure measure, bool isAlcohol, std::string name, float price, uint8_t screen, coord2d pos, span2d span)
-		: Drink(isAlcohol, name, price, screen, pos, span), measure(measure) {
+	Draft(Measure measure, bool isAlcohol, std::string name, float price, uint8_t screen, coord2d pos, span2d span, int quantity);
+
+	Measure getMeasure() const {
+		return measure;
 	}
 };
 

@@ -16,8 +16,10 @@ class Liquor : public Drink
 private:
 	ShotMeasure measure{}; // measure of the liquor
 public:
-	Liquor(ShotMeasure measure, std::string name, float price, uint8_t screen, coord2d pos, span2d span)
-		: Drink(true, name, price, screen, pos, span), measure(measure) {
+	Liquor(ShotMeasure measure, std::string name, float price, uint8_t screen, coord2d pos, span2d span, int quantity);
+
+	ShotMeasure getMeasure() const {
+		return measure;
 	}
 };
 
