@@ -130,7 +130,7 @@
     <ClCompile Include="Bill.cpp" />
     <ClCompile Include="Draft.cpp" />
     <ClCompile Include="Drink.cpp" />
-    <ClCompile Include="EE2010 Pub POS group 6.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Liquor.cpp" />
