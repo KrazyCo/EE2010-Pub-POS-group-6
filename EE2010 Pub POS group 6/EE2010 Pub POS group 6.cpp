@@ -454,11 +454,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
         renderDivider();
 
         // Show manager-only stock commands to managers, hide for normal staff
-        if (g_currentUser && g_currentUser->isManager()) {
-            std::cout << " Commands: add <name>, add <index>, remove <name>, screen <x>, bill new, bill <x>, bill, bills, bill paid, stock add <name> <count>, stock remove <name> <count>, logoff, logout, exit\n";
-        } else {
-            std::cout << " Commands: add <name>, add <index>, remove <name>, screen <x>, bill new, bill <x>, bill, bills, bill paid, logoff, logout, exit\n";
-        }
+        std::cout << " Commands: add <name>, add <index>, remove <name>, screen <x>, bill new, bill <x>, bill, bills, bill paid, logoff, logout, exit\n";
         renderDivider();
 
         std::cout << "> ";
@@ -466,28 +462,9 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
         std::getline(std::cin, input);
         if (input.empty()) continue;
 
-        std::string lower = toLower(input);
+        std::string lower = toLower(trim(input));
         if (lower == "exit") { g_exitRequested = true; return; }
-        if (lower == "[0]" || lower == "0") { return; }
-
-        if (lower.rfind("screen ", 0) == 0) {
-            int nextSid = -1;
-            try {
-                nextSid = std::stoi(trim(lower.substr(7)));
-            } catch (...) {
-                std::cout << "\nERROR: Invalid screen number.\n";
-                continue;
-            }
-            auto byScreen = groupCatalogByScreen(catalogItems);
-            auto it = byScreen.find(static_cast<uint8_t>(nextSid));
-            if (it == byScreen.end()) {
-                std::cout << "\nERROR: Screen not found.\n";
-                continue;
-            }
-            screenId = static_cast<uint8_t>(nextSid);
-            screenMenu(currentBill, currentBillIndex, screenId, it->second);
-            return;
-        }
+        if (lower == "back" || lower == "0" || lower == "[0]") { return; }
 
         // Command: add by name or index
         if (lower.rfind("add ", 0) == 0 && lower.size() > 4) {
@@ -595,9 +572,9 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
             continue;
         }
 
+        // Always show without stock commands
         if (handleGlobalCommand(input, currentBill, currentBillIndex, catalogItems)) {
             if (g_exitRequested) return;
-            // If user logged off, break out to login loop
             if (!g_currentUser) return;
             continue;
         }

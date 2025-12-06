@@ -3,7 +3,6 @@
 #include "Liquor.h"
 #include "Draft.h"
 #include "Food.h"
-#include "2dUtils.h"
 #include <vector>
 
 // Configure catalog with starting quantities
@@ -14,8 +13,6 @@ Liquor doubleVodka(
     "Double Vodka",
     5.50f,
     1,
-    coord2d{0, 0},
-    span2d{1, 1},
     5 // quantity
 );
 Liquor singleVodka(
@@ -23,8 +20,6 @@ Liquor singleVodka(
     "Single Vodka",
     4.00f,
     1,
-    coord2d{0, 1},
-    span2d{1, 1},
     8
 );
 
@@ -33,8 +28,6 @@ Liquor doubleWhiskey(
     "Double Whiskey",
     6.00f,
     1,
-    coord2d{1, 0},
-    span2d{1, 1},
     4
 );
 Liquor singleWhiskey(
@@ -42,8 +35,6 @@ Liquor singleWhiskey(
     "Single Whiskey",
     4.50f,
     1,
-    coord2d{1, 1},
-    span2d{1, 1},
     10
 );
 
@@ -54,8 +45,6 @@ Draft Asahi(
     "Asahi",
     7.00f,
     2,
-    coord2d{0, 0},
-    span2d{1, 1},
     12
 );
 Draft HalfAsahi(
@@ -64,8 +53,6 @@ Draft HalfAsahi(
     "Half Asahi",
     3.50f,
     2,
-    coord2d{0, 1},
-    span2d{1, 1},
     15
 );
 Draft Heineken(
@@ -74,8 +61,6 @@ Draft Heineken(
     "Heineken",
     6.50f,
     2,
-    coord2d{1, 0},
-    span2d{1, 1},
     10
 );
 Draft HalfHeineken(
@@ -84,8 +69,6 @@ Draft HalfHeineken(
     "Half Heineken",
     3.25f,
     2,
-    coord2d{1, 1},
-    span2d{1, 1},
     14
 );
 Draft Coke(
@@ -94,8 +77,6 @@ Draft Coke(
     "Coke",
     3.00f,
     2,
-    coord2d{2, 0},
-    span2d{1, 1},
     8
 );
 Draft HalfCoke(
@@ -104,8 +85,6 @@ Draft HalfCoke(
     "Half Coke",
     1.50f,
     2,
-    coord2d{2, 1},
-    span2d{1, 1},
     12
 );
 
@@ -115,8 +94,6 @@ Food smallFries(
     "Small Fries",
     2.50f,
     3,
-    coord2d{0, 0},
-    span2d{1, 1},
     20
 );
 Food regularFries(
@@ -124,8 +101,6 @@ Food regularFries(
     "Regular Fries",
     3.50f,
     3,
-    coord2d{0, 1},
-    span2d{1, 1},
     18
 );
 
@@ -134,8 +109,6 @@ Food largeFries(
     "Large Fries",
     4.50f,
     3,
-    coord2d{0, 2},
-    span2d{1, 1},
     16
 );
 
@@ -144,8 +117,6 @@ Food smallWings(
     "Small Wings",
     5.00f,
     3,
-    coord2d{1, 0},
-    span2d{1, 1},
     14
 );
 Food regularWings(
@@ -153,8 +124,6 @@ Food regularWings(
     "Regular Wings",
     7.00f,
     3,
-    coord2d{1, 1},
-    span2d{1, 1},
     12
 );
 
@@ -163,8 +132,6 @@ Food largeWings(
     "Large Wings",
     9.00f,
     3,
-    coord2d{1, 2},
-    span2d{1, 1},
     10
 );
 
