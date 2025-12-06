@@ -1,5 +1,7 @@
-// EE2010 Pub POS group 6.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
+// EE2010 Pub POS group 6.cpp
+// Entry point and console UI for the POS app.
+// This file wires together login, bill workflows, item screens, and manager tools.
+
 #include <iostream>
 #include <iomanip>
 #include <string>
@@ -14,28 +16,30 @@
 #include "Bill.h"
 #include "Item.h"
 #include "Item_config.h"
-#include "Drink.h" // add to use Drink-specific properties
+#include "Drink.h" // needed to check alcohol flag before adding to a bill
 #include "Staff.h"
 #include "Manager.h"
 #include "Staff_config.h"
 
-// Global exit flag to allow exiting from any context (including screen menus)
+// Global exit flag that propagates out of nested menus (e.g., screens, stock, staff)
 static bool g_exitRequested = false;
 
 // ------ Helpers ------
+// Clears any error flags and flushes the rest of the current input line.
 static void clearInput()
 {
     std::cin.clear();
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 }
 
+// Lowercase copy, safe with std::tolower for unsigned char.
 static std::string toLower(std::string s)
 {
     std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c){ return static_cast<char>(std::tolower(c)); });
     return s;
 }
 
-// trim whitespace from both ends
+// Trim whitespace from both ends.
 static std::string trim(const std::string& s)
 {
     auto start = s.find_first_not_of(" \t\r\n");
@@ -44,6 +48,7 @@ static std::string trim(const std::string& s)
     return s.substr(start, end - start + 1);
 }
 
+// Simple banner renderer for sections and menus.
 static void renderHeader(const std::string& title, int currentBillIndex)
 {
     std::cout << "\n========================================\n";
@@ -61,7 +66,8 @@ static void renderDivider()
     std::cout << "----------------------------------------\n";
 }
 
-// Group catalog items by their screen attribute (using unified catalog)
+// Groups the catalog into screens by the item "screen" id.
+// This keeps the rest of the UI agnostic to how items are laid out.
 static std::map<uint8_t, std::vector<Item*>> groupCatalogByScreen(const std::vector<Item*>& catalog)
 {
     std::map<uint8_t, std::vector<Item*>> byScreen;
@@ -72,7 +78,7 @@ static std::map<uint8_t, std::vector<Item*>> groupCatalogByScreen(const std::vec
     return byScreen;
 }
 
-// Find item by name (case-insensitive, exact match)
+// Case-insensitive exact name match across the unified catalog.
 static Item* findItemByName(const std::vector<Item*>& catalog, const std::string& name)
 {
     std::string target = toLower(name);
@@ -85,6 +91,7 @@ static Item* findItemByName(const std::vector<Item*>& catalog, const std::string
     return nullptr;
 }
 
+// Show a compact list of bills with totals and who created them.
 static void renderBillsSummary(int currentBillIndex)
 {
     renderHeader("Bills", currentBillIndex);
@@ -106,7 +113,7 @@ static void renderBillsSummary(int currentBillIndex)
     renderDivider();
 }
 
-// Display current bill details
+// Show full details for the current bill
 static void renderCurrentBill(const Bill* bill, int billIndex)
 {
     renderHeader("Current Bill Details", billIndex);
@@ -115,7 +122,7 @@ static void renderCurrentBill(const Bill* bill, int billIndex)
         renderDivider();
         return;
     }
-    // Format times using localtime_s (secure)
+    // Formats a time_t into "YYYY-MM-DD HH:MM:SS" or "N/A" if unset.
     auto formatTime = [](time_t t) {
         if (t == 0) return std::string("N/A");
         char buf[64]{};
@@ -143,7 +150,7 @@ static void renderCurrentBill(const Bill* bill, int billIndex)
     renderDivider();
 }
 
-// Pause helper to wait for Enter (used after bill/bills outputs)
+// Pause after printing a section so users can read before continuing.
 static void waitForEnter()
 {
     std::cout << " Press Enter to continue...";
@@ -151,7 +158,7 @@ static void waitForEnter()
     std::getline(std::cin, dummy);
 }
 
-// Simple yes/no prompt
+// Quick yes/no for alcohol ID checks.
 static bool confirmIdChecked()
 {
     std::cout << " This item is alcoholic. Confirm ID checked (y/n): ";
@@ -164,6 +171,7 @@ static bool confirmIdChecked()
 // --- Logon/Logoff ---
 static const Staff* g_currentUser = nullptr;
 
+// Login banner only.
 static void renderLoginHeader()
 {
     std::cout << "\n========================================\n";
@@ -171,6 +179,7 @@ static void renderLoginHeader()
     std::cout << "\n========================================\n";
 }
 
+// Login lookup searches the user list.
 static const Staff* findUserByName(const std::string& name)
 {
     // Case-insensitive match over the mutable user directory
@@ -184,6 +193,8 @@ static const Staff* findUserByName(const std::string& name)
     return nullptr;
 }
 
+// Basic username/password auth.
+// Type "exit" at the username prompt to quit the whole app.
 static const Staff* tryLogin()
 {
     renderLoginHeader();
@@ -216,6 +227,8 @@ static const Staff* tryLogin()
 }
 
 // --- helpers to parse stock commands ---
+// Parses "name count" where name is a single token (no spaces) and count is an int.
+// Returns false on parse errors. Used by stock commands.
 static bool tryParseTwoTokens(const std::string& s, std::string& nameOut, int& countOut)
 {
     std::istringstream iss(s);
@@ -223,8 +236,6 @@ static bool tryParseTwoTokens(const std::string& s, std::string& nameOut, int& c
     std::string countStr;
     if (!(iss >> name)) return false;
     if (!(iss >> countStr)) return false;
-    // Remaining tokens (if any) are ignored; name is a single-token exact match
-    // Validate count
     try {
         int c = std::stoi(countStr);
         countOut = c;
@@ -235,8 +246,11 @@ static bool tryParseTwoTokens(const std::string& s, std::string& nameOut, int& c
     }
 }
 
-// Parse global commands available from anywhere.
-// Returns true if handled; false if not a global command.
+// Global command parser that can run from any menu.
+// Returns true if the command was handled here.
+// Notes:
+// - "screen <x>" is not fully handled here; returning false lets the caller continue into the screen flow.
+// - Stock commands are manager-only and protected by a role check.
 static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, int& currentBillIndex, const std::vector<Item*>& catalog)
 {
     std::string cmd = toLower(input);
@@ -269,7 +283,6 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
             std::cout << "\nERROR: Usage: " << (isAdd ? "stock add <name> <count>" : "stock remove <name> <count>") << "\n";
             return true;
         }
-        // Find item by exact name (case-insensitive)
         Item* target = findItemByName(catalog, nameToken);
         if (!target) {
             std::cout << "\nERROR: Item not found: " << nameToken << "\n";
@@ -349,7 +362,7 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
         return true;
     }
 
-    // screen <x>
+    // screen <x> is parsed here but handled by the caller (main or screenMenu).
     if (cmd.rfind("screen ", 0) == 0 && cmd.size() > 7) {
         if (!currentBill) {
             std::cout << "\nERROR: Select or create a bill first.\n";
@@ -375,6 +388,7 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
             return true;
         }
 
+        // For alcoholic drinks, we require an ID check confirmation.
         if (auto* drink = dynamic_cast<Drink*>(it)) {
             if (drink->getIsAlcohol()) {
                 if (!confirmIdChecked()) {
@@ -418,10 +432,14 @@ static bool handleGlobalCommand(const std::string& input, Bill*& currentBill, in
         return true;
     }
 
-    return false; // not a global command
+    return false; // not handled here
 }
 
-// Render one screen's items and allow adding to current bill with commands.
+// Screen list for a single screen id. Lets users add/remove by index or name.
+// Notes:
+// - We show stock here to help staff avoid adding out-of-stock items.
+// - "back" or "0" returns to the screen selection menu.
+// - Stock admin is not shown here; managers have a separate Stock screen.
 static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screenId, const std::vector<Item*>& screenItems)
 {
     for (;;) {
@@ -453,7 +471,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
         std::cout << " [0] Back to screens\n";
         renderDivider();
 
-        // Show manager-only stock commands to managers, hide for normal staff
+
         std::cout << " Commands: add <name>, add <index>, remove <name>, screen <x>, bill new, bill <x>, bill, bills, bill paid, logoff, logout, exit\n";
         renderDivider();
 
@@ -489,7 +507,7 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
                     if (idx >= 0 && idx < static_cast<int>(screenItems.size())) {
                         Item* selected = screenItems[static_cast<size_t>(idx)];
 
-                        // Guard: prevent use when selected is null
+       
                         if (selected == nullptr) {
                             std::cout << "\nERROR: Item not found: " << param << "\n";
                             addedByIndex = true;
@@ -572,9 +590,10 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
             continue;
         }
 
-        // Always show without stock commands
+        // Let common commands run (bill, bills, logoff, etc.).
         if (handleGlobalCommand(input, currentBill, currentBillIndex, catalogItems)) {
             if (g_exitRequested) return;
+            // If user logged off, break out to login loop
             if (!g_currentUser) return;
             continue;
         }
@@ -583,7 +602,9 @@ static void screenMenu(Bill*& currentBill, int& currentBillIndex, uint8_t screen
     }
 }
 
-// Manager-only stock management screen
+// Manager-only stock management.
+// Keep operations explicit: set, add, remove. Negative stock is clamped to 0.
+// This screen intentionally separates stock admin from order-taking.
 static void stockMenu(const std::vector<Item*>& catalog)
 {
     for (;;) {
@@ -593,7 +614,7 @@ static void stockMenu(const std::vector<Item*>& catalog)
         if (catalog.empty()) {
             std::cout << " Catalog is empty.\n";
         } else {
-            // Fixed-width, tabular header
+            // Simple fixed-width table for readability.
             std::cout << std::left
                       << std::setw(8)  << "Index"
                       << std::setw(32) << "Name"
@@ -682,7 +703,9 @@ static void stockMenu(const std::vector<Item*>& catalog)
     }
 }
 
-// Staff Management screen (manager-only)
+// Manager-only staff management.
+// Keeps a simple in-memory directory (g_users). Static built-ins remain, while
+// dynamically added users are heap-allocated and cleaned up when removed.
 static void staffMenu()
 {
     for (;;) {
@@ -690,7 +713,7 @@ static void staffMenu()
 
         renderHeader("Staff Management", -1);
 
-        // List users (tabular)
+        // List users in a readable table.
         std::cout << std::left
                   << std::setw(8)  << "ID"
                   << std::setw(24) << "Name"
@@ -727,7 +750,7 @@ static void staffMenu()
         if (lower == "exit") { g_exitRequested = true; return; }
         if (lower == "back") { return; }
 
-        // Tokenize
+        // Minimal tokenizer: verb followed by args. Quotes are not supported.
         std::istringstream iss(input);
         std::string verb;
         if (!(iss >> verb)) { std::cout << "\nERROR: Invalid command.\n"; continue; }
@@ -777,7 +800,7 @@ static void staffMenu()
             Staff* u = findUserById(id);
             if (!u) { std::cout << "\nERROR: User not found.\n"; continue; }
 
-            // Parse key=value pairs
+            // Accept key=value pairs to update fields.
             std::string kv;
             bool roleChangeToManager = u->isManager();
             bool roleChangeRequested = false;
@@ -799,22 +822,20 @@ static void staffMenu()
                 }
             }
 
-            // Apply simple field edits
+            // Apply simple field edits.
             if (!newName.empty()) u->setUserName(newName);
             if (!newPwd.empty()) u->setPassword(newPwd);
             if (!newEmail.empty()) u->setEmail(newEmail);
 
-            // Handle role change by replacing instance type if needed
+            // To change role, we replace the instance with a new one of the desired type.
+            // For built-in static users we do not delete memory; for dynamic users we do.
             if (roleChangeRequested && u->isManager() != roleChangeToManager) {
-                // Disallow changing predefined statics' allocation type; instead simulate role switch by replacing with dynamic object
                 const int oldId = u->getId();
                 const std::string oldName = u->getUserName();
                 const std::string oldPwd = u->getPassword();
                 const std::string oldEmail = u->getEmail();
 
-                // Remove current entry (will not delete if it's static)
                 removeUserById(oldId);
-                // Add new entry with same id info and desired role
                 Staff* replaced = addStaff(oldId, oldName, oldPwd, oldEmail, roleChangeToManager);
                 if (!replaced) {
                     std::cout << "\nERROR: Failed to change role (ID/name conflict).\n";
@@ -831,7 +852,8 @@ static void staffMenu()
     }
 }
 
-// Main UI flow: choose bill, choose screen, add items, with command parsing
+// Main menu loop that hosts navigation and routes into child menus.
+// Important: we always check g_exitRequested after nested screens and logoff.
 int main()
 {
     Bill* currentBill = nullptr;
@@ -854,7 +876,7 @@ int main()
 
         for (;;) {
             if (g_exitRequested) break;
-            if (!g_currentUser) break; // logged off -> return to login
+            if (!g_currentUser) break; // user logged off -> return to login
 
             renderHeader("PUB POS - MAIN MENU", currentBillIndex);
             std::cout << " User: " << g_currentUser->getUserName()
@@ -955,9 +977,10 @@ int main()
                     }
                 }
 
+                // Screen selection loop. This re-groups the catalog to reflect any runtime changes.
                 for (;;) {
                     if (g_exitRequested) break;
-                    if (!g_currentUser) break; // logged off
+                    if (!g_currentUser) break; // user logged off
 
                     auto byScreen = groupCatalogByScreen(catalog);
 

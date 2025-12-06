@@ -3,6 +3,7 @@
 #include "Staff.h"
 #include <string>
 
+// Manager role, inherits login fields from Staff and flips isManager().
 class Manager : public Staff
 {
 	public:

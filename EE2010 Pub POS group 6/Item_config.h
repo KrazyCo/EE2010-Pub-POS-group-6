@@ -5,7 +5,7 @@
 #include "Food.h"
 #include <vector>
 
-// Configure catalog with starting quantities
+// Initial catalog setup and starting stock.
 
 // Liquor
 Liquor doubleVodka(
@@ -135,7 +135,7 @@ Food largeWings(
     10
 );
 
-// Single unified non-owning catalog
+// Non-owning catalog used by the app. Items are static above.
 static std::vector<Item*> catalogItems{
     &doubleVodka, &singleVodka, &doubleWhiskey, &singleWhiskey,
     &Asahi, &HalfAsahi, &Heineken, &HalfHeineken, &Coke, &HalfCoke,

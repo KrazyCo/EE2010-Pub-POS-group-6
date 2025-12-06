@@ -4,6 +4,7 @@
 #include <cstdint> // uint8_t
 #include <corecrt.h>
 
+// Liquor shots. Tracks single/double measure.
 enum class ShotMeasure
 {
     singleShot,
@@ -13,7 +14,8 @@ enum class ShotMeasure
 class Liquor : public Drink
 {
 private:
-    ShotMeasure measure{}; // measure of the liquor
+    ShotMeasure measure{}; // single or double
+
 public:
     Liquor(ShotMeasure measure, std::string name, float price, uint8_t screen, int quantity);
 

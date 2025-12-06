@@ -5,6 +5,7 @@
 #include <corecrt.h>
 #include <string>
 
+// Food options with a size enum (small/regular/large).
 enum class FoodSize
 {
     small,
@@ -15,7 +16,8 @@ enum class FoodSize
 class Food : public Item
 {
 private:
-    FoodSize size{}; // size of the food item
+    FoodSize size{}; // portion size
+
 public:
     Food(FoodSize size, std::string name, float price, uint8_t screen, int quantity);
 

@@ -5,34 +5,31 @@ std::vector<Bill> bills{}; // single definition
 
 bool Bill::addItem(Item& item)
 {
-    // Attempt to consume one from stock
+    // Try to take one from stock first.
     if (!item.tryConsumeOne()) {
         return false; // out of stock
     }
 
     totalPrice += item.getPrice();
-    itemsOrdered.emplace_back(&item); // store non-owning pointer, keeps polymorphism
+    itemsOrdered.emplace_back(&item); // keep pointer to the catalog item
     return true;
 }
 
 bool Bill::removeItem(Item& item)
 {
-    // Find one occurrence of the exact item pointer
+    // Remove a single matching pointer and fix up stock and total.
     for (auto it = itemsOrdered.begin(); it != itemsOrdered.end(); ++it) {
         if (*it == &item) {
-            // Restore stock by one
             item.setQuantityLeft(item.getQuantityLeft() + 1);
 
-            // Adjust total
             totalPrice -= item.getPrice();
             if (totalPrice < 0.0f) {
-                totalPrice = 0.0f; // guard against negative due to floating errors
+                totalPrice = 0.0f; // defensive clamp
             }
 
-            // Remove from bill
             itemsOrdered.erase(it);
             return true;
         }
     }
-    return false; // not found on this bill
+    return false; // nothing matched
 }

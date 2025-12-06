@@ -2,6 +2,7 @@
 
 #include <string>
 
+// Basic staff account with login info. Manager derives from this.
 class Staff
 {
 private:
@@ -9,6 +10,7 @@ private:
     std::string userName;
     std::string password;
     std::string email;
+
 public:
     Staff(int id, const std::string& name, const std::string& pwd, const std::string& mail)
         : userID(id), userName(name), password(pwd), email(mail) {}

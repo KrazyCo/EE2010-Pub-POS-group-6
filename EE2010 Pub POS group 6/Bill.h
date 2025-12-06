@@ -6,20 +6,22 @@
 
 #include "Item.h"
 
+// A bill keeps references to catalog items (non-owning). It tracks totals,
+// whether it is paid, who opened it, and timestamps for opened/paid times.
 class Bill
 {
 private:
-    std::string serverName{};              // staff who created the bill
-    std::vector<Item*> itemsOrdered{};     // non-owning pointers
-    float totalPrice{};                    // total price of the bill
-    bool paid{};                           // whether the bill has been paid
-    bool fulfilled{};                      // whether the order has been fulfilled
-    float discount{};                      // discount applied to the bill if any
-    time_t timeOpened{};                   // when the bill was opened
+    std::string serverName{};              // staff username who created the bill
+    std::vector<Item*> itemsOrdered{};     // non-owning pointers to catalog items
+    float totalPrice{};                    // running total
+    bool paid{};                           // true once marked as paid
+    bool fulfilled{};                      // reserved for future use
+    float discount{};                      // reserved for future use
+    time_t timeOpened{};                   // when the bill was created
     time_t timePaid{};                     // when the bill was marked paid (0 if not paid)
 
 public:
-    // Construct a bill with the creating staff's name; captures open time.
+    // Use this to create a new bill. Captures creator id and open time.
     explicit Bill(const std::string& server)
         : serverName(server),
           totalPrice(0.0f),
@@ -31,11 +33,11 @@ public:
     {
     }
 
-    // Non-owning: references existing catalog items (Drink/Food/Liquor/etc.)
+    // Adds one item to the bill and decrements stock. Returns false if stock is 0.
     bool addItem(Item& item);
 
-    // Remove one occurrence of the item from the bill and restore stock by one.
-    // Returns true if an occurrence was found and removed.
+    // Removes one matching item pointer from the bill and restores stock by one.
+    // Returns true if an occurrence was removed.
     bool removeItem(Item& item);
 
     float getTotalPrice() const { return totalPrice; }
@@ -49,12 +51,13 @@ public:
     // Paid status
     bool isPaid() const { return paid; }
 
+    // Marks the bill as paid and captures the paid timestamp.
     void markPaid() {
         paid = true;
         timePaid = std::time(nullptr);
     }
 };
 
-// Declare the global bills container (defined in Bill.cpp)
+// Global bills container (defined in Bill.cpp)
 extern std::vector<Bill> bills;
 

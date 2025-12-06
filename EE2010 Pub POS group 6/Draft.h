@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <string>
 
+// Draft beers and soft drinks. Tracks measure (pint/half).
 enum class Measure
 {
     pint,
@@ -14,7 +15,8 @@ enum class Measure
 class Draft : public Drink
 {
 private:
-    Measure measure{}; // measure of the draft
+    Measure measure{}; // pour size
+
 public:
     Draft(Measure measure, bool isAlcohol, std::string name, float price, uint8_t screen, int quantity);
 

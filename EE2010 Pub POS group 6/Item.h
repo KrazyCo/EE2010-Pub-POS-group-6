@@ -3,20 +3,23 @@
 #include <string>
 #include <cstdint>
 
+// Base item shared by all sellable products.
+// Note: items do not own memory for anything else; they hold basic info only.
 class Item
 {
 private:
-    std::string name{}; // name of the item
-    float price{}; // price of the item
-    uint8_t screen{}; // screen on the GUI
-    int quantityLeft{}; // remaining stock of this item
+    std::string name{}; // display name
+    float price{};      // unit price
+    uint8_t screen{};   // grouping id for the "screens" UI
+    int quantityLeft{}; // current stock
+
 public:
-    // Ensure safe polymorphic deletion when used via base pointers
+    // Virtual deletor so deleting through Item* is safe.
     virtual ~Item() = default;
 
     Item(std::string name, float price, uint8_t screen, int quantity);
 
-    std::string  getName() const { return name; }
+    std::string getName() const { return name; }
     float getPrice() const { return price; }
     void setPrice(float newPrice);
 
@@ -27,7 +30,7 @@ public:
 
     bool isOutOfStock() const { return quantityLeft <= 0; }
 
-    // Decrements stock by one if available; returns true if decremented
+    // Try to decrement stock by one. Returns true if successful.
     bool tryConsumeOne();
 };
 
