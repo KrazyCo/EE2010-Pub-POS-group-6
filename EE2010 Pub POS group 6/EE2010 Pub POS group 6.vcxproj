@@ -134,8 +134,6 @@
     <ClCompile Include="Food.cpp" />
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="Liquor.cpp" />
-    <ClCompile Include="Manager.cpp" />
-    <ClCompile Include="Staff.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2dUtils.h" />

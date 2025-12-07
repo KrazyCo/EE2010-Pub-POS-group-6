@@ -36,12 +36,6 @@
     <ClCompile Include="Bill.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Staff.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Manager.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Item.h">
