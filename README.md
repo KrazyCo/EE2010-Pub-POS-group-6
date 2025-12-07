@@ -1,6 +1,6 @@
 # EE2010 Pub POS group 6
 
-This repository contains the code and documentation for the EE2010 Pub POS system developed by group 6. 
+This repository contains the code for the EE2010 Pub Point Of Sale (POS) system developed by group 6. 
 The system is designed to streamline the ordering and payment process in a pub environment.
 
 ## Features
