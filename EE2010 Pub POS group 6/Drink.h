@@ -11,6 +11,7 @@ private:
     bool isAlcohol{}; // true if age-restricted
 
 public:
+    // Drink constructor is stored in Drink.cpp
     Drink(bool alcohol, std::string name, float price, uint8_t screen, int quantity);
 
     bool getIsAlcohol() const {
