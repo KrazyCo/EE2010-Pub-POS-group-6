@@ -12,3 +12,12 @@ The system is designed to streamline the ordering and payment process in a pub e
 ## Technical Details
 - Uses polymorphic associations to manage relationships between bills, items.
 - Focuses on modular and maintainable code structure.
+
+## Default Credentials
+Staff Account:
+- Username: conor
+- Password: 123
+
+Manager Account:
+- Username: clive
+- Password: 123
